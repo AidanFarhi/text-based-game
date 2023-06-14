@@ -127,7 +127,7 @@ def get_win_status(current_room: dict, inventory: list) -> tuple:
     return player_won, player_dead
 
 
-def show_end_of_game_message(player_won: bool) -> None:
+def display_end_of_game_message(player_won: bool) -> None:
     """Displays a message.
     
     Args:
@@ -137,6 +137,33 @@ def show_end_of_game_message(player_won: bool) -> None:
         print('You have collected all the items! You win!')
     else:
         print('Oh no! The robot!! You died...')
+
+
+def display_opening_message() -> None:
+    """Displays an opening message."""
+    opening_message = (
+        "-- Disable the Deadly Robot Game --\n"
+        "Collect the six items required to build the remote-control which disables the robot to win the game.\n"
+        "If you enter the room with the robot you will die. Good luck!\n"
+        "----------------- Commands --------------\n"
+        "Move commands: go <north|east|south|west>\n"
+        "Exit command:  exit\n"
+        "-----------------------------------------\n"
+    )
+    print(opening_message, end="")
+
+
+def display_status(current_room: dict, inventory: list) -> None:
+    """Displays the current status.
+    
+    Args:
+        current_room (dict): A dictionary representing the current room and its connections.
+        inventory (list): A list representing the inventory.
+    """
+    print(f"You are in the {current_room['room_name']}")
+    print(f"Inventory: {inventory}")
+    if current_room['item'] is not None:
+        print(f"You see a {current_room['item']}")
 
 
 def main() -> None:
@@ -199,32 +226,20 @@ def main() -> None:
     }
     inventory = []
     current_room = rooms['Main Lobby']
-    opening_message = (
-        "-- Disable the Deadly Robot Game --\n"
-        "Collect the six items required to build the remote-control which disables the robot to win the game.\n"
-        "If you enter the room with the robot you will die. Good luck!\n"
-        "----------------- Commands --------------\n"
-        "Move commands: go <north|east|south|west>\n"
-        "Exit command:  exit\n"
-        "-----------------------------------------\n"
-    )
-    print(opening_message, end="")
     command = (None, None)
     player_won = player_dead = False
+    display_opening_message()
     while player_won is False and player_dead is False:
         is_valid_command = False
         while is_valid_command is False:
-            print(f"You are in the {current_room['room_name']}")
-            print(f"Inventory: {inventory}")
-            if current_room['item'] is not None:
-                print(f"You see a {current_room['item']}")
+            display_status(current_room, inventory)
             command = get_command()
             is_valid_command = validate_command(command, current_room)
             print("-----------------------------------------")
         new_room_name = handle_command(command, current_room, inventory)
         current_room = rooms[new_room_name]
         player_won, player_dead = get_win_status(current_room, inventory)
-    show_end_of_game_message(player_won)
+    display_end_of_game_message(player_won)
 
 
 if __name__ == "__main__":

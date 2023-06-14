@@ -1,5 +1,6 @@
 # Aidan Farhi - 2023-06-13
 
+
 def get_command() -> tuple:
     """Prompts the user to enter a command and returns it as a tuple.
 
@@ -9,6 +10,13 @@ def get_command() -> tuple:
     command = input("Enter Command > ")
     command = tuple(command.split())
     return command
+
+
+def validate_item_command(command: tuple, current_room: dict) -> bool:
+    if current_room['item'] is None or command[1:] != tuple(current_room['item'].split()):
+        print(f'Cannot get {command[1]}')
+        return False
+    return True
 
 
 def validate_move_command(command: tuple, current_room: dict) -> bool:
@@ -42,14 +50,16 @@ def validate_command(command: tuple, current_room: dict) -> bool:
         bool: True if the command is valid, False otherwise.
     """
     valiation_result = True
-    if len(command) > 2:
+    if len(command) > 3:
         print("Invalid input!")
         valiation_result = False
-    elif command[0] not in ("exit", "go"):
+    elif command[0] not in ("go", "get"):
         print("Invalid input!")
         valiation_result = False
     elif command[0] == "go":
         valiation_result = validate_move_command(command, current_room)
+    elif command[0] == 'get':
+        valiation_result = validate_item_command(command, current_room)
     return valiation_result
 
 
@@ -61,89 +71,138 @@ def handle_direction_command(command: tuple, current_room: dict) -> str:
         current_room (dict): A dictionary representing the current room and its connections.
 
     Returns:
-        dict: The new room after moving in the specified direction.
+        str: The new room after moving in the specified direction.
     """
     direction = command[1]
-    new_room = current_room[direction]
-    return new_room
+    new_room_name = current_room[direction]
+    return new_room_name
 
 
-def handle_command(command: tuple, current_room: dict) -> tuple:
+def handle_item_command(current_room: dict, inventory: list) -> None:
+    """Handles an item command.
+    
+    Args:
+        current_room (dict): A dictionary representing the current room and its connections.
+        inventory (list): A list representing the inventory.
+    """
+    inventory.append(current_room['item'])
+    current_room['item'] = None
+
+
+def handle_command(command: tuple, current_room: dict, inventory: list) -> str:
     """Handles a command.
 
     Args:
         command (tuple): A tuple containing the command and its arguments.
         current_room (dict): A dictionary representing the current room and its connections.
+        inventory (list): A list representing the inventory.
 
     Returns:
-        tuple: A tuple containing the new room and an indicator for program exit.
+        str: A string containing the new room name.
     """
-    new_room = current_room
-    exit_program = False
+    new_room_name = current_room['room_name']
     current_command = command[0]
     if current_command == "go":
-        new_room = handle_direction_command(command, current_room)
+        new_room_name = handle_direction_command(command, current_room)
+    elif current_command == "get":
+        handle_item_command(current_room, inventory)
+    return new_room_name
+
+
+def get_win_status(current_room: dict, inventory: list) -> tuple:
+    """Figures out the win status.
+    
+    Args:
+        current_room (dict): A dictionary representing the current room and its connections.
+        inventory (list): A list representing the inventory.
+
+    Returns:
+        tuple: A tuple containing indicators as to whether the player has won or died.
+    """
+    player_won = player_dead = False
+    if current_room['has_robot'] is True:
+        player_dead = True
+    elif len(inventory) == 6: # player has collected all six items
+        player_won = True
+    return player_won, player_dead
+
+
+def show_end_of_game_message(player_won: bool) -> None:
+    """Displays a message.
+    
+    Args:
+        player_won (bool): An indicator as to whether the player has won the game.
+    """
+    if player_won is True:
+        print('You have collected all the items! You win!')
     else:
-        exit_program = True
-    return new_room, exit_program
+        print('Oh no! The robot!! You died...')
 
 
 def main() -> None:
     """The main function of the text based game."""
     rooms = {
         "Main Lobby": {
-            "north": "Recreation Room", 
+            "room_name": "Main Lobby",
+            "north": "Recreation Room",
             "south": "Security Office",
             "east": "Maintenence Room",
             "item": None,
-            "has_robot": False
+            "has_robot": False,
         },
         "Recreation Room": {
-            "south": "Main Lobby", 
+            "room_name": "Recreation Room",
+            "south": "Main Lobby",
             "item": "Battery pack",
-            "has_robot": False
+            "has_robot": False,
         },
         "Security Office": {
+            "room_name": "Security Office",
             "north": "Main Lobby",
             "item": "Transmitter",
-            "has_robot": False
+            "has_robot": False,
         },
         "Maintenence Room": {
+            "room_name": "Maintenence Room",
             "west": "Main Lobby",
             "east": "Computer Lab",
-            "item": "Elecrical tape",
-            "has_robot": False
+            "item": "Electrical tape",
+            "has_robot": False,
         },
         "Computer Lab": {
+            "room_name": "Computer Lab",
             "north": "3D Printing Lab",
             "east": "Prototype Lab",
             "south": "Parts Supply Room",
             "west": "Maintenence Room",
             "item": "Microchip",
-            "has_robot": False
+            "has_robot": False,
         },
         "3D Printing Lab": {
+            "room_name": "3D Printing Lab",
             "south": "Computer Lab",
             "item": "Remote-control case",
-            "has_robot": False
+            "has_robot": False,
         },
         "Parts Supply Room": {
+            "room_name": "Parts Supply Room",
             "north": "Computer Lab",
             "item": "Wire kit",
-            "has_robot": False
+            "has_robot": False,
         },
         "Prototype Lab": {
+            "room_name": "Prototype Lab",
             "west": "Computer Lab",
             "item": None,
-            "has_robot": True
-        }
+            "has_robot": True,
+        },
     }
     inventory = []
-    current_room = "Main Lobby"
+    current_room = rooms['Main Lobby']
     opening_message = (
         "-- Disable the Deadly Robot Game --\n"
         "Collect the six items required to build the remote-control which disables the robot to win the game.\n"
-        "If you enter the room with the robot you will die.\n"
+        "If you enter the room with the robot you will die. Good luck!\n"
         "----------------- Commands --------------\n"
         "Move commands: go <north|east|south|west>\n"
         "Exit command:  exit\n"
@@ -151,16 +210,21 @@ def main() -> None:
     )
     print(opening_message, end="")
     command = (None, None)
-    exit_program = False
-    while exit_program is False:
+    player_won = player_dead = False
+    while player_won is False and player_dead is False:
         is_valid_command = False
         while is_valid_command is False:
-            print(f"You are in the {current_room}")
+            print(f"You are in the {current_room['room_name']}")
+            print(f"Inventory: {inventory}")
+            if current_room['item'] is not None:
+                print(f"You see a {current_room['item']}")
             command = get_command()
-            is_valid_command = validate_command(command, rooms[current_room])
+            is_valid_command = validate_command(command, current_room)
             print("-----------------------------------------")
-        current_room, exit_program = handle_command(command, rooms[current_room])
-    print("Thanks for playing!")
+        new_room_name = handle_command(command, current_room, inventory)
+        current_room = rooms[new_room_name]
+        player_won, player_dead = get_win_status(current_room, inventory)
+    show_end_of_game_message(player_won)
 
 
 if __name__ == "__main__":

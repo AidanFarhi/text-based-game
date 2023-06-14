@@ -220,7 +220,7 @@ def main() -> None:
         "Prototype Lab": {
             "room_name": "Prototype Lab",
             "west": "Computer Lab",
-            "item": None,
+            "item": 'Robot',
             "has_robot": True,
         },
     }
@@ -239,6 +239,7 @@ def main() -> None:
         new_room_name = handle_command(command, current_room, inventory)
         current_room = rooms[new_room_name]
         player_won, player_dead = get_win_status(current_room, inventory)
+    display_status(current_room, inventory)
     display_end_of_game_message(player_won)
 
 

@@ -155,8 +155,8 @@ def display_opening_message() -> None:
         "Collect the six items required to build the remote-control which disables the robot to win the game.\n"
         "If you enter the room with the robot you will die. Good luck!\n"
         "----------------- Commands --------------\n"
-        "Move commands: go <north|east|south|west>\n"
-        "Exit command:  exit\n"
+        "Move command:      go <north|east|south|west>\n"
+        "Get item command:  get <item name>\n"
         "-----------------------------------------\n"
     )
     print(opening_message, end="")

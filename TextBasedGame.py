@@ -13,8 +13,17 @@ def get_command() -> tuple:
 
 
 def validate_item_command(command: tuple, current_room: dict) -> bool:
-    if current_room['item'] is None or command[1:] != tuple(current_room['item'].split()):
-        print(f'Cannot get {command[1]}')
+    """Validates an item-related command in the current room.
+
+    Args:
+        command (tuple): A tuple representing the command.
+        current_room (dict): A dictionary representing the current room.
+
+    Returns:
+        bool: True if the item-related command is valid, False otherwise.
+    """
+    if current_room["item"] is None or command[1:] != tuple(current_room["item"].split()):
+        print(f"Cannot get {command[1]}")
         return False
     return True
 
@@ -58,7 +67,7 @@ def validate_command(command: tuple, current_room: dict) -> bool:
         valiation_result = False
     elif command[0] == "go":
         valiation_result = validate_move_command(command, current_room)
-    elif command[0] == 'get':
+    elif command[0] == "get":
         valiation_result = validate_item_command(command, current_room)
     return valiation_result
 
@@ -80,13 +89,13 @@ def handle_direction_command(command: tuple, current_room: dict) -> str:
 
 def handle_item_command(current_room: dict, inventory: list) -> None:
     """Handles an item command.
-    
+
     Args:
         current_room (dict): A dictionary representing the current room and its connections.
         inventory (list): A list representing the inventory.
     """
-    inventory.append(current_room['item'])
-    current_room['item'] = None
+    inventory.append(current_room["item"])
+    current_room["item"] = None
 
 
 def handle_command(command: tuple, current_room: dict, inventory: list) -> str:
@@ -100,7 +109,7 @@ def handle_command(command: tuple, current_room: dict, inventory: list) -> str:
     Returns:
         str: A string containing the new room name.
     """
-    new_room_name = current_room['room_name']
+    new_room_name = current_room["room_name"]
     current_command = command[0]
     if current_command == "go":
         new_room_name = handle_direction_command(command, current_room)
@@ -111,7 +120,7 @@ def handle_command(command: tuple, current_room: dict, inventory: list) -> str:
 
 def get_win_status(current_room: dict, inventory: list) -> tuple:
     """Figures out the win status.
-    
+
     Args:
         current_room (dict): A dictionary representing the current room and its connections.
         inventory (list): A list representing the inventory.
@@ -120,23 +129,23 @@ def get_win_status(current_room: dict, inventory: list) -> tuple:
         tuple: A tuple containing indicators as to whether the player has won or died.
     """
     player_won = player_dead = False
-    if current_room['has_robot'] is True:
+    if current_room["has_robot"] is True:
         player_dead = True
-    elif len(inventory) == 6: # player has collected all six items
+    elif len(inventory) == 6:  # player has collected all six items
         player_won = True
     return player_won, player_dead
 
 
 def display_end_of_game_message(player_won: bool) -> None:
     """Displays a message.
-    
+
     Args:
         player_won (bool): An indicator as to whether the player has won the game.
     """
     if player_won is True:
-        print('You have collected all the items! You win!')
+        print("You have collected all the items! You win!")
     else:
-        print('Oh no! The robot!! You died...')
+        print("Oh no! The robot!! You died...")
 
 
 def display_opening_message() -> None:
@@ -155,14 +164,14 @@ def display_opening_message() -> None:
 
 def display_status(current_room: dict, inventory: list) -> None:
     """Displays the current status.
-    
+
     Args:
         current_room (dict): A dictionary representing the current room and its connections.
         inventory (list): A list representing the inventory.
     """
     print(f"You are in the {current_room['room_name']}")
     print(f"Inventory: {inventory}")
-    if current_room['item'] is not None:
+    if current_room["item"] is not None:
         print(f"You see a {current_room['item']}")
 
 
@@ -220,12 +229,12 @@ def main() -> None:
         "Prototype Lab": {
             "room_name": "Prototype Lab",
             "west": "Computer Lab",
-            "item": 'Robot',
+            "item": "Robot",
             "has_robot": True,
         },
     }
     inventory = []
-    current_room = rooms['Main Lobby']
+    current_room = rooms["Main Lobby"]
     command = (None, None)
     player_won = player_dead = False
     display_opening_message()

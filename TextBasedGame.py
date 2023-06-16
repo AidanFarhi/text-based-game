@@ -59,7 +59,7 @@ def validate_command(command: tuple, current_room: dict) -> bool:
         bool: True if the command is valid, False otherwise.
     """
     valiation_result = True
-    if len(command) > 3:
+    if len(command) > 3 or len(command) == 0:
         print("Invalid input!")
         valiation_result = False
     elif command[0] not in ("go", "get"):
@@ -95,6 +95,7 @@ def handle_item_command(current_room: dict, inventory: list) -> None:
         inventory (list): A list representing the inventory.
     """
     inventory.append(current_room["item"])
+    print(f'Obtained {current_room["item"]}')
     current_room["item"] = None
 
 
@@ -157,7 +158,6 @@ def display_opening_message() -> None:
         "----------------- Commands --------------\n"
         "Move command:      go <north|east|south|west>\n"
         "Get item command:  get <item name>\n"
-        "-----------------------------------------\n"
     )
     print(opening_message, end="")
 
@@ -241,10 +241,10 @@ def main() -> None:
     while player_won is False and player_dead is False:
         is_valid_command = False
         while is_valid_command is False:
+            print("-----------------------------------------")
             display_status(current_room, inventory)
             command = get_command()
             is_valid_command = validate_command(command, current_room)
-            print("-----------------------------------------")
         new_room_name = handle_command(command, current_room, inventory)
         current_room = rooms[new_room_name]
         player_won, player_dead = get_win_status(current_room, inventory)
